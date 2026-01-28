@@ -340,32 +340,105 @@ Optimized (최적화):
 
 ---
 
-### 3.3 Top 20 개선 사례
+### 3.3 Top 20 개선 사례 (실제 SQL 힌트 포함)
 
-| 순위 | 쿼리 | Baseline | 최적화 | 절약 | 개선율 | 힌트 |
-|------|------|----------|--------|------|--------|------|
-| 1 | **16d** | 16.91s | 1.06s | 15.9s | **93.7%** | optimizer_4 |
-| 2 | **17a** | 76.02s | 8.33s | 67.7s | **89.0%** | join_method_1 |
-| 3 | **6a** | 0.45s | 0.05s | 0.4s | **88.3%** | join_method_2 |
-| 4 | **3a** | 2.47s | 0.32s | 2.2s | **87.2%** | table_hint_2 |
-| 5 | **22d** | 118.18s | 17.51s | 100.7s | **85.2%** | optimizer_4 |
-| 6 | **18b** | 12.44s | 1.86s | 10.6s | **85.1%** | optimizer_1 |
-| 7 | **2a** | 3.55s | 0.54s | 3.0s | **84.8%** | table_hint_2 |
-| 8 | **23c** | 16.33s | 2.61s | 13.7s | **84.0%** | optimizer_2 |
-| 9 | **22c** | 138.52s | 26.69s | 111.8s | **80.7%** | optimizer_4 |
-| 10 | **25a** | 134.87s | 27.17s | 107.7s | **79.9%** | optimizer_4 |
-| 11 | **21a** | 0.36s | 0.08s | 0.3s | **79.1%** | optimizer_4 |
-| 12 | **3c** | 3.09s | 0.66s | 2.4s | **78.8%** | table_hint_2 |
-| 13 | **27a** | 0.36s | 0.08s | 0.3s | **78.1%** | optimizer_3 |
-| 14 | **6b** | 0.72s | 0.16s | 0.6s | **77.7%** | optimizer_3 |
-| 15 | **16b** | 108.55s | 24.72s | 83.8s | **77.2%** | optimizer_4 |
-| 16 | **16a** | 2.01s | 0.46s | 1.6s | **77.2%** | optimizer_4 |
-| 17 | **16c** | 67.24s | 17.60s | 49.6s | **73.8%** | optimizer_4 |
-| 18 | **26a** | 12.59s | 3.38s | 9.2s | **73.1%** | optimizer_2 |
-| 19 | **30c** | 44.41s | 12.00s | 32.4s | **73.0%** | optimizer_4 |
-| 20 | **23a** | 10.41s | 2.87s | 7.6s | **72.5%** | optimizer_4 |
+| 순위 | 쿼리 | Baseline | 최적화 | 개선율 | 실제 SQL 힌트 |
+|------|------|----------|--------|--------|---------------|
+| 1 | **16d** | 16.91s | 1.06s | **93.7%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 2 | **17a** | 76.02s | 8.33s | **89.0%** | `/*+ NO_BNL() */` |
+| 3 | **6a** | 0.45s | 0.05s | **88.3%** | `/*+ NO_HASH_JOIN() */` |
+| 4 | **3a** | 2.47s | 0.32s | **87.2%** | `/*+ NO_ICP(ct) */` |
+| 5 | **22d** | 118.18s | 17.51s | **85.2%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 6 | **18b** | 12.44s | 1.86s | **85.1%** | `/*+ NO_INDEX_MERGE(t) */` |
+| 7 | **2a** | 3.55s | 0.54s | **84.8%** | `/*+ NO_ICP(ct) */` |
+| 8 | **23c** | 16.33s | 2.61s | **84.0%** | `/*+ NO_ICP(mi_idx) */` |
+| 9 | **22c** | 138.52s | 26.69s | **80.7%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 10 | **25a** | 134.87s | 27.17s | **79.9%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 11 | **21a** | 0.36s | 0.08s | **79.1%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 12 | **3c** | 3.09s | 0.66s | **78.8%** | `/*+ NO_ICP(ct) */` |
+| 13 | **27a** | 0.36s | 0.08s | **78.1%** | `/*+ SET_VAR(optimizer_switch="block_nested_loop=off") */` |
+| 14 | **6b** | 0.72s | 0.16s | **77.7%** | `/*+ SET_VAR(optimizer_switch="block_nested_loop=off") */` |
+| 15 | **16b** | 108.55s | 24.72s | **77.2%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 16 | **16a** | 2.01s | 0.46s | **77.2%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 17 | **16c** | 67.24s | 17.60s | **73.8%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 18 | **26a** | 12.59s | 3.38s | **73.1%** | `/*+ NO_ICP(mi_idx) */` |
+| 19 | **30c** | 44.41s | 12.00s | **73.0%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
+| 20 | **23a** | 10.41s | 2.87s | **72.5%** | `/*+ SET_VAR(optimizer_switch="batched_key_access=on") */` |
 
-**Top 20만으로 734초 절약 (전체의 66.5%)**
+**Top 20만으로 734초 절약 (전체의 67.8%)**
+
+#### 힌트 적용 예시
+
+**1. Query 16d (93.7% 개선) - Batched Key Access**
+
+Before:
+```sql
+SELECT MIN(t.title) AS movie_title
+FROM title AS t
+JOIN movie_companies AS mc ON t.id = mc.movie_id
+JOIN movie_info AS mi ON t.id = mi.movie_id
+...
+```
+
+After:
+```sql
+SELECT /*+ SET_VAR(optimizer_switch="batched_key_access=on") */
+  MIN(t.title) AS movie_title
+FROM title AS t
+JOIN movie_companies AS mc ON t.id = mc.movie_id
+JOIN movie_info AS mi ON t.id = mi.movie_id
+...
+```
+
+Result: 16.91s → 1.06s (15.9초 절약)
+
+---
+
+**2. Query 17a (89.0% 개선) - NO_BNL**
+
+Before:
+```sql
+SELECT MIN(n.name) AS member_in_charnamed_movie
+FROM cast_info AS ci
+JOIN company_name AS cn ON ci.movie_id = cn.id
+...
+```
+
+After:
+```sql
+SELECT /*+ NO_BNL() */
+  MIN(n.name) AS member_in_charnamed_movie
+FROM cast_info AS ci
+JOIN company_name AS cn ON ci.movie_id = cn.id
+...
+```
+
+Result: 76.02s → 8.33s (67.7초 절약)
+
+---
+
+**3. Query 3a (87.2% 개선) - Table-Specific NO_ICP**
+
+Before:
+```sql
+SELECT MIN(mc.note) AS production_note
+FROM company_type AS ct
+JOIN movie_companies AS mc ON ct.id = mc.company_type_id
+...
+```
+
+After:
+```sql
+SELECT /*+ NO_ICP(ct) */
+  MIN(mc.note) AS production_note
+FROM company_type AS ct
+JOIN movie_companies AS mc ON ct.id = mc.company_type_id
+...
+```
+
+Result: 2.47s → 0.32s (2.2초 절약)
+
+**핵심:** 특정 테이블(ct)에만 ICP 비활성화하여 정밀한 최적화
 
 ---
 

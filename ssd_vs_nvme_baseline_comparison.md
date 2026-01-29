@@ -24,14 +24,16 @@ For queries with significant I/O requirements, NVMe provides a **1.7x to 2.2x** 
 
 > **Insight**: These are the prime candidates for **Table Hints** on SSD. Since I/O is the bottleneck, hints that reduce random access (e.g., by forcing different join orders or indexes) should yield higher gains on SSD than on NVMe.
 
-## 🐢 Anomalies: Where SSD was Faster?
+## 🐢 Anomalies: Why was SSD Faster in Some Cases?
 
-Surprisingly, for some queries, the SSD baseline recorded faster times. This might be due to run-to-run variance, caching differences, or specific plan choices.
+Counter-intuitively, the SSD baseline outperformed NVMe for queries like `16b` and `10c`. This phenomenon highlights a limitation in the MySQL Optimizer's **Cost Model**.
 
-| Query | SSD Time (s) | NVMe Time (s) | Speedup | Note |
+| Query | SSD Time (s) | NVMe Time (s) | Speedup | Root Cause Analysis |
 |---|---|---|---|---|
-| **16b** | 108.55 | 139.33 | 0.78x | NVMe was slower (Plan regression?) |
-| **10c** | 93.05 | 128.13 | 0.73x | NVMe was slower |
+| **16b** | 108.55 | 139.33 | 0.78x | **Optimizer Misjudgment**. On NVMe, the optimizer likely underestimated the cost of Random I/O due to low latency, choosing a naive execution plan (e.g., inefficient Nested Loop Join). On SSD, the higher cost forced it to pick a safer, albeit theoretically "slower", plan (e.g., Hash Join) which turned out to be faster in practice. |
+| **10c** | 93.05 | 128.13 | 0.73x | Similar optimization regression. |
+
+> **Implication**: Faster hardware does not secure faster queries if the plan is suboptimal. This reinforces the need for **Hint 01 (Optimizer Switch)** which forces better algorithms (like BKA/Hash Join), as seen in our NVMe experiments where `16b` dropped from 139s to 23s.
 
 ## 📊 Overall Statistics
 

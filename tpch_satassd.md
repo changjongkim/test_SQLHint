@@ -53,8 +53,8 @@ MySQL 8.0 환경(SSD 기반)에서 TPC-H (Scale Factor 30) 벤치마크 쿼리�
 
 *   **Q13 (Customer Distribution Query)**
     *   **성능 변화**: 174초 → 62초 (**64% 개선**)
-    *   **원인 분석**: Q13은 `CUSTOMER`와 `ORDERS`의 Left Outer Join을 수행합니다. `o_comment`에 대한 `NOT LIKE` 조건이 있어 까다롭습니다.
-    *   **Hint 효과 (Hint 05)**: 적절한 인덱스 힌트를 통해 `ORDERS` 테이블 접근 시 불필요한 스캔을 줄이고, Group By 처리 효율을 높인 것으로 추정됩니다. 특히 Join Buffer를 사용하는 Block Nested Loop 대신 인덱스 기반 Nested Loop가 효과를 발휘.
+    *   **원인 분석**: Q13은 `CUSTOMER`와 `ORDERS`의 Left Outer Join을 수행합니다. `o_comment`에 대한 `NOT LIKE` 조건이 있어 까다로운듯.
+    *   **Hint 효과 (Hint 05)**: 적절한 인덱스 힌트를 통해 `ORDERS` 테이블 접근 시 불필요한 스캔을 줄이고, Group By 처리 효율을 높인 것으로 추정. 특히 Join Buffer를 사용하는 Block Nested Loop 대신 인덱스 기반 Nested Loop가 효과를 발휘.
 
 *   **Q8 (National Market Share Query)**
     *   **성능 변화**: 580초 → 267초 (**54% 개선**)
